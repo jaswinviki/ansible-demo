@@ -1,0 +1,9 @@
+# Variable file for host db_and_web_server
+ansible_ssh_pass: Passw0rd
+ansible_host: 172.31.91.217
+db_name: employee_db
+db_user: db_user
+db_password: Passw0rd
+http_host: abc-local
+http_conf: abc-local.conf
+http_port: "80"
