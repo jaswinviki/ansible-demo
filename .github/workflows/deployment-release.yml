@@ -1,0 +1,47 @@
+name: Publish artifact to be deployed
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      minorVersion:
+        description: 'HOTFIX ONLY - the version that this patch is based on. (x) in 1.x.y.'
+        required: true
+      patchVersion:
+        description: 'HOTFIX ONLY - the patch number. (y) in 1.x.y'
+        required: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      VERSION_NUMBER: 1.${{ github.event.inputs.minorVersion || github.run_number }}.${{ github.event.inputs.patchVersion || 0 }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set build version
+      run: |
+        echo "{\"build\": \"${{ env.VERSION_NUMBER }}\", \"ref\": \"${{ github.sha }}\" }" > version.json
+        echo "${{ env.VERSION_NUMBER }}" > ci_build_version.txt
+    - name: Zip project
+      run: |
+        zip -r artifact.zip *
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
+      with:
+        tag_name: "${{ env.VERSION_NUMBER }}+release"
+        release_name: "${{ env.VERSION_NUMBER }}+release"
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUBTOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./artifact.zip
+        asset_name: artifact.zip
+        asset_content_type: application/zip
