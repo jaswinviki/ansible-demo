@@ -22,6 +22,7 @@ jobs:
       run: |
         echo "{\"build\": \"${{ env.VERSION_NUMBER }}\", \"ref\": \"${{ github.sha }}\" }" > version.json
         echo "${{ env.VERSION_NUMBER }}" > ci_build_version.txt
+        echo "this is comming from copytag"
     - name: Zip project
       run: |
         zip -r artifact.zip *
